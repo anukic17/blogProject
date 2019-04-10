@@ -18,13 +18,11 @@ import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 import javax.swing.JOptionPane;
 
 public class BlogGUI extends javax.swing.JFrame {
- 
-    private static Scanner scanner = new Scanner(System.in);
-    private User activeUser = new User ("", "");
+    
+    private User activeUser = new User ();
     /**
      * Creates new form BlogGUI
      */
@@ -141,10 +139,12 @@ public class BlogGUI extends javax.swing.JFrame {
     private void registerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerButtonActionPerformed
         // TODO add your handling code here:
         String userName = JOptionPane.showInputDialog("Enter a user name: ");
+        activeUser.setUsername(userName);
         String password= JOptionPane.showInputDialog("Enter a password: ");
+        activeUser.setPassword(password);
         
         //register user to database
-        activeUser.register(userName, password);
+        activeUser.register(activeUser.getUsername(), activeUser.getPassword());
         
         //output successful completion of registration notification
         JOptionPane.showMessageDialog(null, "User sucessfully registered! Please Log in");
@@ -218,7 +218,13 @@ public class BlogGUI extends javax.swing.JFrame {
         }//end username if statement
         
         }catch(Exception e){
-                JOptionPane.showMessageDialog(null, "Sorry username or password is incorrect");
+            
+            if(!login.equals(activeUser.getUsername())){
+                JOptionPane.showMessageDialog(null, "Sorry username is incorrect");
+            }
+            if(!loginPassword.equals(activeUser.getPassword())){
+                JOptionPane.showMessageDialog(null, "Sorry password is incorrect");
+            }
                 }
         
         
