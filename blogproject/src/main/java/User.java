@@ -87,14 +87,14 @@ public class User {
 
 
     public void register(String username, String password) {
-        //Create user with parameters passed in
+        
+//Create user with parameters passed in
         User user = new User(username, password);
 
 
         //Create User.
         Document newUser = new Document("userName", user.getUsername())
-                .append("password", user.getPassword())
-                .append("posts", user.getMyPosts()); //getMyPosts
+                .append("password", user.getPassword());
 
         /* Insert object into collection. */
         userCollection.insertOne(newUser);

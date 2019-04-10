@@ -1,15 +1,30 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * CS485 MongoDB Project
+ * Description: A GUI implementation of a database project of a online blog website. 
+ * It allows users to register log in, (create, edit, and delete posts), view tags, and user walls. 
+ * Author: Amel Nukic & Joe Hernandez
+ * Date: 4/10/2019
  */
+
 
 /**
  *
  * @author bk8355tn
  */
-public class BlogGUI extends javax.swing.JFrame {
 
+import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
+
+import java.util.ArrayList;
+import java.util.Scanner;
+import javax.swing.JOptionPane;
+
+public class BlogGUI extends javax.swing.JFrame {
+ 
+    private static Scanner scanner = new Scanner(System.in);
+    private User activeUser = new User ("", "");
     /**
      * Creates new form BlogGUI
      */
@@ -27,22 +42,57 @@ public class BlogGUI extends javax.swing.JFrame {
     private void initComponents() {
 
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        textArea = new javax.swing.JTextArea();
+        registerButton = new javax.swing.JButton();
+        logInButton = new javax.swing.JButton();
+        logOutButton = new javax.swing.JButton();
+        tagsButton = new javax.swing.JButton();
+        clearButton = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
+        textArea.setColumns(20);
+        textArea.setRows(5);
+        jScrollPane1.setViewportView(textArea);
 
-        jButton1.setText("jButton1");
+        registerButton.setText("Register");
+        registerButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                registerButtonActionPerformed(evt);
+            }
+        });
 
-        jButton2.setText("jButton2");
+        logInButton.setText("Log in");
+        logInButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                logInButtonActionPerformed(evt);
+            }
+        });
 
-        jButton3.setText("jButton3");
+        logOutButton.setText("Log out");
+        logOutButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                logOutButtonActionPerformed(evt);
+            }
+        });
+
+        tagsButton.setText("Tags");
+        tagsButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tagsButtonActionPerformed(evt);
+            }
+        });
+
+        clearButton.setText("Clear");
+        clearButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                clearButtonActionPerformed(evt);
+            }
+        });
+
+        jLabel1.setFont(new java.awt.Font("Lucida Grande", 0, 24)); // NOI18N
+        jLabel1.setText("Mongo Blog");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -50,25 +100,37 @@ public class BlogGUI extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(19, 19, 19)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2)
-                    .addComponent(jButton3))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addComponent(logOutButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(logInButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(registerButton, javax.swing.GroupLayout.DEFAULT_SIZE, 115, Short.MAX_VALUE)
+                    .addComponent(tagsButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(clearButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(18, 18, 18)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 514, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(36, Short.MAX_VALUE))
+                .addContainerGap(18, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel1)
+                .addGap(203, 203, 203))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(94, 94, 94)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGap(43, 43, 43)
+                .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButton1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jButton2)
+                        .addComponent(registerButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton3))
+                        .addComponent(logInButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(logOutButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(tagsButton)
+                        .addGap(53, 53, 53)
+                        .addComponent(clearButton))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 383, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(40, Short.MAX_VALUE))
         );
@@ -76,12 +138,127 @@ public class BlogGUI extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void registerButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_registerButtonActionPerformed
+        // TODO add your handling code here:
+        String userName = JOptionPane.showInputDialog("Enter a user name: ");
+        String password= JOptionPane.showInputDialog("Enter a password: ");
+        
+        //register user to database
+        activeUser.register(userName, password);
+        
+        //output successful completion of registration notification
+        JOptionPane.showMessageDialog(null, "User sucessfully registered! Please Log in");
+        
+        
+    }//GEN-LAST:event_registerButtonActionPerformed
+
+    private void logInButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logInButtonActionPerformed
+        // TODO add your handling code here:
+        String login = JOptionPane.showInputDialog("Enter a user name: ");
+        String loginPassword = JOptionPane.showInputDialog("Enter a password: ");
+        
+        try{
+        //check to veryify the username is correct
+        if(activeUser.getUsername().equalsIgnoreCase(login)){
+            
+            //check to verify password is correct
+            if(activeUser.getPassword().equals(loginPassword)){
+                
+                int selection;
+                String menu = JOptionPane.showInputDialog("\nMENU"
+					+ "\n1.Create New Post" 
+					+ "\n2.Edit Post"
+					+ "\n3.Delete Post" 
+					+ "\n4.Search by tags"
+					+ "\n5.View user wall\n\n");
+			selection = Integer.parseInt(menu);
+
+			switch (selection) {
+			case 1:
+                            
+                            String title = JOptionPane.showInputDialog("Enter title of post: ");
+                           
+                            String body = JOptionPane.showInputDialog("Write post body: ");
+                       
+                            // Post date
+                            String postDate = "";
+
+                            //add tags
+                            String tags = JOptionPane.showInputDialog("Add tags");
+
+                            ArrayList tagList = new ArrayList<String>();
+                            ArrayList commentList = new ArrayList<String>();
+                            tagList.add("test");
+                            commentList.add("this is a comment");
+
+
+                    activeUser.createPost(title, activeUser.getUsername(), body, 
+                            "4-55-2019",0, commentList , tagList);
+
+                            
+                            break;
+                        case 2:
+                            
+                            break;
+                        case 3:
+                            
+                            break;
+                        case 4:
+                            
+                            break;
+                        case 5:
+                            
+                            break;
+                        
+                        
+                        
+                        
+                        }//end switch statement           
+            }//end password if statement
+        }//end username if statement
+        
+        }catch(Exception e){
+                JOptionPane.showMessageDialog(null, "Sorry username or password is incorrect");
+                }
+        
+        
+        
+    }//GEN-LAST:event_logInButtonActionPerformed
+
+    private void logOutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logOutButtonActionPerformed
+        // TODO add your handling code here:
+        JOptionPane.showMessageDialog(null, "You have been logged out and the system will now close, GOOD BYE!");
+        System.exit(0);
+        
+    }//GEN-LAST:event_logOutButtonActionPerformed
+
+    private void tagsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tagsButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_tagsButtonActionPerformed
+
+    private void clearButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearButtonActionPerformed
+        // TODO add your handling code here:
+        textArea.setText("");
+    }//GEN-LAST:event_clearButtonActionPerformed
+
     /**
      * @param args the command line arguments
      */
     public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
+       
+        //create localhost mongo client
+        MongoClient mongoClient = new MongoClient("localhost", 27017);
+       
+        //Connect to database.
+        MongoDatabase database = mongoClient.getDatabase("BlogDatabase");
+
+
+        ArrayList globalPost = new ArrayList<Post>();
+
+
+        MongoCollection<Document> userCollection = database.getCollection("User");
+        MongoCollection<Document> postCollection = database.getCollection("Blog");
+//<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
          */
@@ -112,10 +289,13 @@ public class BlogGUI extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton clearButton;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
+    private javax.swing.JButton logInButton;
+    private javax.swing.JButton logOutButton;
+    private javax.swing.JButton registerButton;
+    private javax.swing.JButton tagsButton;
+    private javax.swing.JTextArea textArea;
     // End of variables declaration//GEN-END:variables
 }
